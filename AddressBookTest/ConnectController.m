@@ -55,9 +55,11 @@
         CNContactStore *contactStore = [[CNContactStore alloc] init];
         [contactStore requestAccessForEntityType:CNEntityTypeContacts completionHandler:^(BOOL granted, NSError * _Nullable error) {
             if (granted) {
-                CNContactPickerViewController *contactPickerVC = [[CNContactPickerViewController alloc] init];
-                contactPickerVC.delegate = self;
-                [self presentViewController:contactPickerVC animated:YES completion:nil];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    CNContactPickerViewController *contactPickerVC = [[CNContactPickerViewController alloc] init];
+                    contactPickerVC.delegate = self;
+                    [self presentViewController:contactPickerVC animated:YES completion:nil];
+                });
             } else {
                 NSLog(@"授权失败, error=%@", error);
             }
@@ -71,13 +73,15 @@
 
 -(void)readeAddressBook
 {
-    __weak typeof(self) wakeSelf = self;
     CNAuthorizationStatus authorizationStatus = [CNContactStore authorizationStatusForEntityType:CNEntityTypeContacts];
     if (authorizationStatus == CNAuthorizationStatusNotDetermined) {
         CNContactStore *contactStore = [[CNContactStore alloc] init];
         [contactStore requestAccessForEntityType:CNEntityTypeContacts completionHandler:^(BOOL granted, NSError * _Nullable error) {
             if (granted) {
-                [wakeSelf readeBookAddress1];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self readeBookAddress1];
+                });
+
             } else {
                 NSLog(@"授权失败, error=%@", error);
             }

@@ -70,7 +70,9 @@
         ABAddressBookRef addressBookRef = ABAddressBookCreate();
         ABAddressBookRequestAccessWithCompletion(addressBookRef, ^(bool granted, CFErrorRef error) {
             if (granted) {
-                NSLog(@"授权成功");
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self gotoAddressBook1];
+                });
             }else
                 NSLog(@"授权失败");
         });
@@ -96,13 +98,17 @@
     ABAddressBookRef addressBookRef = ABAddressBookCreateWithOptions(NULL, NULL);
     if (ABAddressBookGetAuthorizationStatus() == kABAuthorizationStatusNotDetermined) {
         ABAddressBookRequestAccessWithCompletion(addressBookRef, ^(bool granted, CFErrorRef error){
-            CFErrorRef *error1 = NULL;
-            ABAddressBookRef addressBook = ABAddressBookCreateWithOptions(NULL, error1);
-            [self copyAddressBook:addressBook];
+            if (granted) {
+                ABAddressBookRef addressBook = ABAddressBookCreateWithOptions(addressBookRef, &error);
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self copyAddressBook:addressBook];
+                });
+            }else{
+                NSLog(@"拒绝");
+            }
         });
     }
     else if (ABAddressBookGetAuthorizationStatus() == kABAuthorizationStatusAuthorized){
-        
         CFErrorRef *error = NULL;
         ABAddressBookRef addressBook = ABAddressBookCreateWithOptions(NULL, error);
         [self copyAddressBook:addressBook];
